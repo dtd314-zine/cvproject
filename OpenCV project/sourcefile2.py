@@ -9,22 +9,12 @@ import numpy as np
 import cv2
 
 
-def empty(a):
-    pass
-
-
-cv2.namedWindow("Parameters")
-cv2.resizeWindow("Parameters", 640,240)
-cv2.createTrackbar("v1", "Parameters", 0, 255, empty)
-cv2.createTrackbar("v2", "Parameters", 255, 255, empty)
 cap = cv2.VideoCapture(0)
 
 
 
 def getContours(img, imgContour):
     contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    v1 = cv2.getTrackbarPos("v1", "Parameters")
-    v2 = cv2.getTrackbarPos("v2", "Parameters")
     for i, cnt in enumerate(contours): #cnt ek contour he
         area = cv2.contourArea(cnt)
         if (area > 5000) and (hierarchy[0][i][2] < 0 and hierarchy[0][i][3] < 0):
@@ -131,9 +121,7 @@ while True:
     getContours(dilated, imgContour)
     
     
-    cv2.imshow("dileated",dilated)
     cv2.imshow("Real image",img)
-    cv2.imshow("canny image",canny)
     cv2.imshow("Contour drawn",imgContour)
     
     if cv2.waitKey(1) & 0xFF == ord('q'):
