@@ -13,43 +13,55 @@ def empty(a):
     pass
 
 
-
+cv2.namedWindow("Parameters")
+cv2.resizeWindow("Parameters", 640,240)
+cv2.createTrackbar("v1", "Parameters", 0, 255, empty)
+cv2.createTrackbar("v2", "Parameters", 255, 255, empty)
 cap = cv2.VideoCapture(0)
+
 
 
 def getContours(img, imgContour):
     contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    v1 = cv2.getTrackbarPos("v1", "Parameters")
+    v2 = cv2.getTrackbarPos("v2", "Parameters")
     for i, cnt in enumerate(contours): #cnt ek contour he
-        mask = np.zeros_like(img)
-        cv2.drawContours(mask, cnt, 0, 255,thickness=cv2.FILLED)
-        avg_color = cv2.mean(imgContour, mask)
-        bgr_array = np.array([[avg_color]], dtype=np.uint8) #bgr array   
-        hsv_array = cv2.cvtColor(bgr_array, cv2.COLOR_BGR2HSV) #respective hsv array
-        hsv_tuple = tuple(hsv_array[0, 0]) #hsv tuple of pixel
-        if (all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_red, upper_red)) or all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_red1, upper_red1))):
-            color = "Red"
-        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_orange, upper_orange)):
-            color = "Orange"
-        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_yellow, upper_yellow)):
-            color = "Yellow"
-        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_green, upper_green)):
-            color = "Green"
-        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_cyan, upper_cyan)):
-            color = "Cyan"
-        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_blue, upper_blue)):
-            color = "Blue"
-        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_purple, upper_purple)):
-            color = "Purple"
-        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_white, upper_white)):
-            color = "White"
-        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_gray, upper_gray)):
-            color = "Gray"
-        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_black, upper_black)):
-            color = "Black"
-        else:
-            color = "avg color is white"
-            
         area = cv2.contourArea(cnt)
+        if (area > 5000) and (hierarchy[0][i][2] < 0 and hierarchy[0][i][3] < 0):
+            mask = np.zeros_like(img)
+            cv2.fillPoly(mask, [cnt], (255, 255, 255))
+            cv2.imshow("Mask",mask)
+            avg_color = cv2.mean(imgContour, mask)
+        else:
+            avg_color = np.array([0,0,0],dtype=np.uint8)
+        bgr_array1 = np.array([[avg_color]], dtype=np.uint8) #bgr array   
+        hsv_array = cv2.cvtColor(bgr_array1, cv2.COLOR_BGR2HSV) #respective hsv array
+        hsv_array[0,0,1] = hsv_array[0,0,1] + 50 #increasing saturation 
+        hsv_tuple = tuple(hsv_array[0, 0]) #hsv tuple of pixel
+        bgr_array = tuple(bgr_array1[0, 0])
+        if (all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_red, upper_red)) or all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_red1, upper_red1))):
+            color = "Red " + str(bgr_array)
+        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_orange, upper_orange)):
+            color = "Orange "+ str(bgr_array)
+        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_yellow, upper_yellow)):
+            color = "Yellow "+ str(bgr_array)
+        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_green, upper_green)):
+            color = "Green "+ str(bgr_array)
+        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_cyan, upper_cyan)):
+            color = "Cyan "+ str(bgr_array)
+        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_blue, upper_blue)):
+            color = "Blue "+ str(bgr_array)
+        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_purple, upper_purple)):
+            color = "Purple "+ str(bgr_array)
+        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_white, upper_white)):
+            color = "White "+ str(bgr_array)
+        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_gray, upper_gray)):
+            color = "Gray "+ str(bgr_array)
+        elif all(lower <= value <= upper for value, lower, upper in zip(hsv_tuple, lower_black, upper_black)):
+            color = "Black "+ str(bgr_array)
+        else:
+            color = str(bgr_array)
+            
         if (area > 5000) and (hierarchy[0][i][2] < 0 and hierarchy[0][i][3] < 0):
             cv2.drawContours(imgContour, cnt, -1, (255,0,255),3)
             perim = cv2.arcLength(cnt, True)
