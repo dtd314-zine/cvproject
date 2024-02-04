@@ -11,6 +11,27 @@ import cv2
 
 cap = cv2.VideoCapture(0)
 
+dist = 0 # by camera caliberation
+focal = 1300
+pixels = 30
+width = 4
+
+
+kernel = np.ones((3,3),'uint8')
+font = cv2.FONT_HERSHEY_SIMPLEX 
+org = (0,20)  
+fontScale = 0.6 
+color = (0, 0, 255) 
+thickness = 2
+
+def get_dist(rectange_params,image):
+    
+    pixels = rectange_params[1][0]
+    dist = (width*focal)/pixels
+    return dist
+
+
+
 
 
 def getContours(img, imgContour):
@@ -58,6 +79,10 @@ def getContours(img, imgContour):
             approx = cv2.approxPolyDP(cnt, 0.02*perim, True)
             x, y, w, h, = cv2.boundingRect(approx)
             cv2.rectangle(imgContour, (x,y), (x+w,y+h),(0,255,0),3)
+            rect = cv2.minAreaRect(cnt)
+            box = cv2.boxPoints(rect) 
+            box = np.intp(box)
+            distance = get_dist(rect,imgContour)
             cv2.putText(imgContour, "Area: "+ str(int(area)),(x+w-200, y+45), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0,255,0),2)
             cv2.putText(imgContour, "Points: "+ str(len(approx)),(x+w-200,y+20),cv2.FONT_HERSHEY_COMPLEX,0.8,(0,255,0),2)
             if len(approx) == 4:
@@ -66,15 +91,20 @@ def getContours(img, imgContour):
                   cv2.putText(imgContour, "Square", (x+w-200, y+70), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 255, 0),2)
                   cv2.putText(imgContour, "X and Y: "+str(int((h+w)/2)), (x+w-200, y+95), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 255, 0),2)
                   cv2.putText(imgContour,"Color: "+color, (x+w-200, y+120), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 255, 0),2)
+                  cv2.putText(imgContour,"Distance: "+str((distance)), (x+w-200, y+140), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 255, 255),2)
                 else:
                   cv2.putText(imgContour, "Rectangle", (x+w-200, y+70), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 255, 0),2)
                   cv2.putText(imgContour, "X and Y: "+str(int(w))+" "+str(int(h)), (x+w-200, y+95), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 255, 0),2)
                   cv2.putText(imgContour,"Color: "+color, (x+w-200, y+120), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 255, 0),2)
+                  cv2.putText(imgContour,"Distance: "+str((distance)), (x+w-200, y+140), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 255, 255),2)
             elif len(approx) > 4 and len(approx) <10:
                   cv2.putText(imgContour, "Circle", (x+w-200, y+70), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 255, 0),2)
                   cv2.putText(imgContour, "Radius : "+ str(int(h/2)), (x+w-200, y+95), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 255, 0),2)
                   cv2.putText(imgContour,"Color: "+color, (x+w-200, y+120), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 255, 0),2)
+                  cv2.putText(imgContour,"Distance: "+str((distance)), (x+w-200, y+140), cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 255, 255),2)
     
+    
+
 while True:
     success, img = cap.read()
     
@@ -119,18 +149,27 @@ while True:
     ker = np.ones((5,5))
     dilated = cv2.dilate(canny, ker, iterations=1)
     getContours(dilated, imgContour)
-    
-    
     cv2.imshow("Real image",img)
-    cv2.imshow("Contour drawn",imgContour)
+    cv2.imshow("Contour image",imgContour)
     
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    
+    if cv2.waitKey(100) & 0xFF == ord('q'):
         break
     
     
     
-    
+
     
     
 cap.release()
 cv2.destroyAllWindows()
+'''directory_path = os.path.join(os.getcwd(), "tempstore/") 
+if os.path.exists(directory_path) and os.path.isdir(directory_path):
+    files = os.listdir(directory_path)
+
+    # Iterate through each file and delete it
+    for file in files:
+        file_path = os.path.join(directory_path, file)
+        if os.path.isfile(file_path):
+            os.remove(file_path)'''
+
